@@ -1,7 +1,7 @@
 import React from 'react';
 import {CardValue, VoterState} from '../../votingpoker';
 import PieChart from 'react-minimal-pie-chart';
-import {Props as LabelProps} from "react-minimal-pie-chart/types/Label";
+import {Props as LabelProps} from 'react-minimal-pie-chart/types/Label';
 
 type Props = {
     voters: VoterState[];

@@ -19,7 +19,7 @@ const CardComponent = (props: Props) => {
              }}>
             <h1 className={styles.cardValue}>{value}</h1>
         </div>
-    )
+    );
 };
 
 export default CardComponent;

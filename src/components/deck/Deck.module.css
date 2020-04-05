@@ -6,7 +6,7 @@
     max-width: 35em;
 }
 
-@media(max-device-width: 768px) {
+@media (max-device-width: 768px) {
     .deck {
         grid-template-columns: repeat(2, 1fr);
         max-width: 17em;
