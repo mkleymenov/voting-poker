@@ -1,6 +1,6 @@
 # Voting Poker Web Application
 
-## :warn: Work In Progress :warn:
+## :warning: Work In Progress :warning:
 
 Writing a clone of http://www.votingpoker.com/ using TypeScript, React and AWS cloud technologies for personal use and education.
 
