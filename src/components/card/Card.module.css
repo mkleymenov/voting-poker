@@ -1,0 +1,30 @@
+.card {
+    display: block;
+    width: 7em;
+    height: 10em;
+    background-color: #F3F3F3;
+    border-radius: 4px;
+    border: 1px solid #EAEAEA;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.cardValue {
+    display: inline-block;
+    color: #666;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 4em;
+    margin: auto;
+    vertical-align: baseline;
+    line-height: 2.5em;
+}
+
+.card.selected {
+    border-color: #B31D46;
+    background-color: #D8466E;
+}
+
+.card.selected .cardValue {
+    color: #F3F3F3;
+}

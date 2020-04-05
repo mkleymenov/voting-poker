@@ -1,0 +1,38 @@
+.voter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    list-style: none;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 15em;
+    margin-bottom: 1em;
+    font-family: Helvetica Neue, Helvetica, sans-serif;
+}
+
+.voterName {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 1em;
+}
+
+.voterValue {
+    width: 2em;
+    margin-left: 1em;
+    flex-shrink: 0;
+}
+
+.voterStatus {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    vertical-align: text-top;
+    flex-shrink: 0;
+    background-color: #EEE8AA;
+}
+
+.voterStatusVoted {
+    background-color: #6AD604;
+}
