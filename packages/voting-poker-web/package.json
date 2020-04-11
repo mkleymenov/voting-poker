@@ -11,6 +11,7 @@
     "@types/node": "^12.12.26",
     "@types/react": "^16.9.19",
     "@types/react-dom": "^16.9.5",
+    "@types/socket.io-client": "^1.4.32",
     "react-scripts": "3.3.1",
     "typescript": "^3.7.5"
   },
@@ -18,7 +19,8 @@
     "classnames": "^2.2.6",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-minimal-pie-chart": "^7.0.0"
+    "react-minimal-pie-chart": "^7.0.0",
+    "socket.io-client": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

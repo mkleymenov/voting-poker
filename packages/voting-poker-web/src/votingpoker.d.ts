@@ -11,7 +11,14 @@ export interface CardState {
 }
 
 export interface VoterState {
+    id: string;
     name: string;
-    voted: boolean,
+    voted: boolean;
     value?: CardValue;
+    moderator: boolean;
+}
+
+export interface VotingPokerState {
+    voters: VoterState[];
+    gameOver: boolean;
 }
