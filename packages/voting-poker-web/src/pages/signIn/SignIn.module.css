@@ -1,0 +1,57 @@
+.signIn {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    height: 100vh;
+    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+.signInForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+}
+
+.signInLogo {
+    color: #D8466E;
+    flex-shrink: 1;
+    font-size: 2em;
+    text-align: center;
+    font-style: italic;
+}
+
+.signInError {
+    color: #ff8d00;
+    text-align: center;
+}
+
+.signInInput {
+    margin: 8px 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 1.5em;
+    height: 2em;
+}
+
+.signInName {
+    border: 1px solid #D8466E;
+}
+
+.signInButton {
+    background-color: #D8466E;
+    border: none;
+    color: #F3F3F3;
+    cursor: pointer;
+}
+
+.signInButton:disabled {
+    background-color: rgba(216, 70, 110, 0.5);
+}
+
+@media (min-device-width: 768px) {
+    .signInForm {
+        max-width: 30%;
+        margin: auto;
+    }
+}

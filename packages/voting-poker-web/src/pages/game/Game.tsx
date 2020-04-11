@@ -3,7 +3,7 @@ import styles from './Game.module.css';
 import React, {useEffect, useState} from 'react';
 import VoterList from '../../components/voterList/VoterList';
 import './Game.module.css';
-import {CardState, CardValue, VotingPokerState} from '../../votingpoker';
+import {CardState, CardValue, VoterState, VotingPokerState} from '../../votingpoker';
 import StartVotingButton from '../../components/actionButton/StartVotingButton';
 import StopVotingButton from '../../components/actionButton/StopVotingButton';
 import VotesChart from '../../components/votesChart/VotesChart';
@@ -15,31 +15,33 @@ const INITIAL_CARDS_STATE: CardState[] = CARD_VALUES.map(value => ({
     selected: false,
 }));
 
-const INITIAL_APP_STATE: VotingPokerState = {
-    voters: [],
-    gameOver: false,
-};
-
-const SOCKET = io({port: '8080'});
+const SOCKET = io({
+    port: '8080',
+    autoConnect: false,
+});
 
 type Props = {
-    selfId: string;
-    sessionId: string;
+    self: VoterState;
 };
 
-const GameComponent = (props: Props) => {
+const GameComponent = ({self}: Props) => {
     const [cards, setCards] = useState(INITIAL_CARDS_STATE);
-    const [gameState, setGameState] = useState(INITIAL_APP_STATE);
+
+    const initialAppState: VotingPokerState = {
+        voters: [self],
+        gameOver: false,
+    };
+    const [gameState, setGameState] = useState(initialAppState);
 
     useEffect(
         () => {
             SOCKET.on('gameStateChanged', setGameState);
-            SOCKET.emit('join', {
-                id: props.selfId,
-                sessionId: props.sessionId,
-            });
+            SOCKET.connect()
+                .emit('voterJoined', {
+                    id: self.id,
+                });
         },
-        [],
+        [self.id],
     );
 
     useEffect(
@@ -47,8 +49,7 @@ const GameComponent = (props: Props) => {
         [gameState.gameOver],
     );
 
-    const {sessionId, voters, gameOver} = gameState;
-    const self = voters.filter(voter => voter.id === gameState.selfId)[0];
+    const {voters, gameOver} = gameState;
 
     const onCardClick = (state: CardState) => {
         if (gameOver) {
@@ -63,18 +64,15 @@ const GameComponent = (props: Props) => {
         );
 
         SOCKET.emit('voteChanged', {
-            sessionId,
-            voter: {
-                id: gameState.selfId,
-                voted: state.selected,
-                value: state.selected ? state.value : undefined,
-            },
+            id: self.id,
+            voted: state.selected,
+            value: state.selected ? state.value : undefined,
         });
     };
 
     const setGameOver = (gameOver: boolean): (() => void) => () => {
         SOCKET.emit('gameOver', {
-            sessionId,
+            id: self.id,
             gameOver,
         });
     };
