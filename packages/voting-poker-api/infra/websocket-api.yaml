@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Runtime: node12.x
+    Runtime: nodejs12.x
     Timeout: 10
     Tracing: 'Active'
     CodeUri: ../build
