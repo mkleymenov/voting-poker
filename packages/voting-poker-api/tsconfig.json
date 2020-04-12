@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": [
+      "esnext"
+    ],
+    "outDir": "build/src",
+    "rootDir": "src",
+    "esModuleInterop": true,
+    "strict": true,
+    "module": "esnext",
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "node_modules",
+    "src/**/*.test.ts"
+  ]
+}
