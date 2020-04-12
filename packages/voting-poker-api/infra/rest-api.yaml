@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  VotingPokerRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      EndpointConfiguration: REGIONAL
+      Name: VotingPokerRestApi
+      StageName: Prod
+      TracingEnabled: true
+
+  SignInFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SignInFunction
+      Runtime: node12.x
+      CodeUri: ../build
+      Handler: src/signin/index.handler
+      Tracing: Active
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSXrayWriteOnlyAccess
+      ReservedConcurrentExecutions: 10
+      Timeout: 10
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /signin
+            Method: POST
+            RestApiId: !Ref VotingPokerRestApi
