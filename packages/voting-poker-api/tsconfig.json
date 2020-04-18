@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2017",
     "lib": [
-      "esnext"
+      "es6"
     ],
     "outDir": "build/src",
     "rootDir": "src",
     "esModuleInterop": true,
     "strict": true,
-    "module": "esnext",
+    "module": "CommonJS",
     "resolveJsonModule": true,
     "moduleResolution": "Node",
     "skipDefaultLibCheck": true,
