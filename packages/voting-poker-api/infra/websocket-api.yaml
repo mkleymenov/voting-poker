@@ -52,6 +52,12 @@ Resources:
         - 'integrations/${Integration}'
         - Integration: !Ref MessageIntegration
 
+  ProdStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      StageName: Prod
+
   VotingPokerDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -60,15 +66,16 @@ Resources:
       - DefaultRoute
     Properties:
       ApiId: !Ref VotingPokerWsApi
-      StageName: Prod
+      StageName: !Ref ProdStage
 
   ConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref VotingPokerWsApi
       IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
       IntegrationUri: !Sub
-        - 'arn:aws:apigateway:${Region}/lambda/path/2015-03-31/functions/${FunctionArn}/invocations'
+        - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
         - Region: !Ref AWS::Region
           FunctionArn: !GetAtt ConnectFunction.Arn
 
@@ -77,8 +84,9 @@ Resources:
     Properties:
       ApiId: !Ref VotingPokerWsApi
       IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
       IntegrationUri: !Sub
-        - 'arn:aws:apigateway:${Region}/lambda/path/2015-03-31/functions/${FunctionArn}/invocations'
+        - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
         - Region: !Ref AWS::Region
           FunctionArn: !GetAtt DisconnectFunction.Arn
 
@@ -87,8 +95,9 @@ Resources:
     Properties:
       ApiId: !Ref VotingPokerWsApi
       IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
       IntegrationUri: !Sub
-        - 'arn:aws:apigateway:${Region}/lambda/path/2015-03-31/functions/${FunctionArn}/invocations'
+        - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
         - Region: !Ref AWS::Region
           FunctionArn: !GetAtt MessageFunction.Arn
 
