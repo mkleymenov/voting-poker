@@ -6,7 +6,6 @@ Globals:
     Runtime: nodejs12.x
     Timeout: 10
     Tracing: 'Active'
-    CodeUri: ../build
 
 Resources:
   VotingPokerWsApi:
@@ -106,27 +105,59 @@ Resources:
     Properties:
       FunctionName: ConnectFunction
       Handler: src/websocket/index.connect
+      CodeUri: ../build
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSXrayWriteOnlyAccess
       ReservedConcurrentExecutions: 10
+
+  ConnectFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ConnectFunction.Arn
+      Principal: apigateway.amazonaws.com
 
   DisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: DisconnectFunction
       Handler: src/websocket/index.disconnect
+      CodeUri: ../build
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSXrayWriteOnlyAccess
       ReservedConcurrentExecutions: 10
+
+  DisconnectFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt DisconnectFunction.Arn
+      Principal: apigateway.amazonaws.com
 
   MessageFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: MessageFunction
       Handler: src/websocket/index.message
+      CodeUri: ../build
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSXrayWriteOnlyAccess
       ReservedConcurrentExecutions: 30
+
+  MessageFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt MessageFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  WebSocketUrl:
+    Value: !Sub
+      - 'wss://${ApiId}.execute-api.${Region}.amazonaws.com/${ApiStage}/'
+      - ApiId: !Ref VotingPokerWsApi
+        Region: !Ref AWS::Region
+        ApiStage: !Ref ProdStage
