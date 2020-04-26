@@ -1,0 +1,30 @@
+{
+  "name": "voting-poker-api",
+  "version": "0.1.0",
+  "description": "Serverless API for Voting Poker App",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "test": "NODE_ENV=test jest --config ./jest.config.json",
+    "build": "tsc",
+    "stage": "cp ./package.json ./build/ && cd ./build && npm install --production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkleymenov/voting-poker.git"
+  },
+  "author": "Mikhail Kleymenov",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.656.0",
+    "aws-xray-sdk": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.48",
+    "@types/jest": "^25.2.1",
+    "@types/node": "^13.11.1",
+    "jest": "^25.3.0",
+    "ts-jest": "^25.3.1",
+    "typescript": "^3.7.5"
+  }
+}

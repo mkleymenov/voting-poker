@@ -1,0 +1,163 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Timeout: 10
+    Tracing: 'Active'
+
+Resources:
+  VotingPokerWsApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: VotingPokerWsApi
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: '$request.body.message'
+
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      RouteKey: $connect
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      OperationName: Connect
+      Target: !Sub
+        - 'integrations/${Integration}'
+        - Integration: !Ref ConnectIntegration
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      RouteKey: $disconnect
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      OperationName: Disconnect
+      Target: !Sub
+        - 'integrations/${Integration}'
+        - Integration: !Ref DisconnectIntegration
+
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      RouteKey: $default
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      OperationName: Message
+      Target: !Sub
+        - 'integrations/${Integration}'
+        - Integration: !Ref MessageIntegration
+
+  ProdStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      StageName: Prod
+
+  VotingPokerDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - DisconnectRoute
+      - DefaultRoute
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      StageName: !Ref ProdStage
+
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub
+        - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
+        - Region: !Ref AWS::Region
+          FunctionArn: !GetAtt ConnectFunction.Arn
+
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub
+        - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
+        - Region: !Ref AWS::Region
+          FunctionArn: !GetAtt DisconnectFunction.Arn
+
+  MessageIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref VotingPokerWsApi
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub
+        - 'arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
+        - Region: !Ref AWS::Region
+          FunctionArn: !GetAtt MessageFunction.Arn
+
+  ConnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ConnectFunction
+      Handler: src/websocket/index.connect
+      CodeUri: ../build
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSXrayWriteOnlyAccess
+      ReservedConcurrentExecutions: 10
+
+  ConnectFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ConnectFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  DisconnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: DisconnectFunction
+      Handler: src/websocket/index.disconnect
+      CodeUri: ../build
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSXrayWriteOnlyAccess
+      ReservedConcurrentExecutions: 10
+
+  DisconnectFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt DisconnectFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  MessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: MessageFunction
+      Handler: src/websocket/index.message
+      CodeUri: ../build
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSXrayWriteOnlyAccess
+      ReservedConcurrentExecutions: 30
+
+  MessageFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt MessageFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  WebSocketUrl:
+    Value: !Sub
+      - 'wss://${ApiId}.execute-api.${Region}.amazonaws.com/${ApiStage}/'
+      - ApiId: !Ref VotingPokerWsApi
+        Region: !Ref AWS::Region
+        ApiStage: !Ref ProdStage
