@@ -38,6 +38,12 @@ export const handler = async (
 
     return {
         body: JSON.stringify(voter),
+        // TODO: temporary CORS headers for testing local web app against prod
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+        },
         statusCode: 200,
     };
 };
