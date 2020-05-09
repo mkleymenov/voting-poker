@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import Game from './Game';
 import {CardValue, VoterState, VotingPokerState} from '../../votingpoker';
-import useWebsocket, {WebSocketContext, WebSocketMessage} from '../../utils/useWebsocket';
+import useWebsocket, {WebSocketContext, WebSocketMessage} from '../../hooks/useWebsocket';
 
 type Props = {
     self: VoterState;
