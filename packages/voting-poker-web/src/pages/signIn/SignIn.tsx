@@ -24,6 +24,8 @@ const INITIAL_REQUEST_STATE: SignInRequestState = {
     inFlight: false,
 };
 
+const SIGN_IN_ENDPOINT = 'https://je6g3fkrua.execute-api.eu-central-1.amazonaws.com/Prod/signin';
+
 const signIn = (
     params: SignInRequestParams,
     onRequestStateChanged: (state: SignInRequestState) => void,
@@ -33,7 +35,7 @@ const signIn = (
         body: JSON.stringify(params),
     };
 
-    fetch('http://localhost:8080/signin', fetchOpts)
+    fetch(SIGN_IN_ENDPOINT, fetchOpts)
         .then((response) => response.json())
         .then((data) => onRequestStateChanged({
             data,
