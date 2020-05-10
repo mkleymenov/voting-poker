@@ -4,6 +4,7 @@ type VotingPokerEventType = 'voterJoined' | 'voteChanged' | 'gameOver';
 type VotingPokerEventBody = VoterJoined | VoteChanged | GameOver;
 
 interface VotingPokerEvent {
+    connectionId: string;
     message: VotingPokerEventType;
     body: VotingPokerEventBody;
 }
@@ -28,7 +29,7 @@ export type WebSocketEvent = VoterJoinedEvent | VoteChangedEvent | GameOverEvent
 const dispatch = async (event: WebSocketEvent): Promise<GameState> => {
     switch (event.message) {
         case 'voterJoined':
-            return onVoterJoined(event.body);
+            return onVoterJoined(event.body, event.connectionId);
         case 'voteChanged':
             return onVoteChanged(event.body);
         case 'gameOver':

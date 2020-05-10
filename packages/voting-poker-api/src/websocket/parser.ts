@@ -5,18 +5,27 @@ export const parseWebSocketEvent = async (
     event: APIGatewayProxyEvent,
 ): Promise<WebSocketEvent> =>
     new Promise((resolve, reject) => {
-        const {body} = event;
+        const {body, requestContext} = event;
+        const {connectionId} = requestContext;
+
         if (!body) {
             reject('The event has an empty body');
             return;
         }
+        if (!connectionId) {
+            reject('The event does not have a connection id');
+            return;
+        }
 
         try {
-            const message = JSON.parse(body) as WebSocketEvent;
-            if (message && message.message && message.body) {
-                resolve(message);
+            const webSocketEvent = JSON.parse(body) as WebSocketEvent;
+            if (webSocketEvent && webSocketEvent.message && webSocketEvent.body) {
+                resolve({
+                    ...webSocketEvent,
+                    connectionId,
+                });
             } else {
-                reject(`Received malformed WebSocketEvent: ${message}`);
+                reject(`Received malformed WebSocketEvent: ${webSocketEvent}`);
             }
         } catch (e) {
             reject(`Could not parse an event body ${body} as JSON: ${e}`);

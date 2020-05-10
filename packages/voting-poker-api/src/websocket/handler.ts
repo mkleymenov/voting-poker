@@ -1,3 +1,5 @@
+import * as storage from './storage';
+
 export interface VoterJoined {
     id: string;
 }
@@ -36,8 +38,13 @@ const GAME_STATE_STUB: GameState = {
     gameOver: false,
 };
 
-export const onVoterJoined = async (voterJoined: VoterJoined): Promise<GameState> => {
-    return Promise.resolve(GAME_STATE_STUB);
+export const onVoterJoined = async (
+    voterJoined: VoterJoined,
+    connectionId: string,
+): Promise<GameState> => {
+    await storage.addVoterConnection(voterJoined.id, connectionId);
+    GAME_STATE_STUB.voters.forEach(voter => voter.id = voterJoined.id);
+    return GAME_STATE_STUB;
 };
 
 export const onVoteChanged = async (voteChanged: VoteChanged): Promise<GameState> => {

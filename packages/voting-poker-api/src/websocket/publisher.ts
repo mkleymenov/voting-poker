@@ -1,4 +1,5 @@
 import {GameState, VoterState} from './handler';
+import * as storage from './storage';
 import AWS from 'aws-sdk';
 
 const API_GW_ENDPOINT = process.env['API_GW_ENDPOINT'] || '';
@@ -8,15 +9,15 @@ const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
     endpoint: API_GW_ENDPOINT,
 });
 
-const getConnectionId = async (voter: VoterState): Promise<string> =>
-    // TODO: fetch from DynamoDB
-    Promise.resolve(voter.id);
-
 const publishGameState = async (gameState: GameState): Promise<void> => {
     const promises = gameState.voters.map(async (voter: VoterState) => {
-        const connectionId = await getConnectionId(voter);
+        const connectionId = await storage.getVoterConnection(voter.id);
+        if (!connectionId) {
+            console.error(`Cannot find connection id for voter ${voter.id}`);
+            return;
+        }
 
-        await apiGatewayManagementApi.postToConnection({
+        return apiGatewayManagementApi.postToConnection({
             ConnectionId: connectionId,
             Data: JSON.stringify(gameState),
         }).promise();

@@ -48,10 +48,19 @@ describe('message', () => {
         body: {
             id: '12345',
         },
+        connectionId: '12345',
     };
 
     const MOCK_EVENT = {
-        body: JSON.stringify(MOCK_WS_EVENT),
+        requestContext: {
+            connectionId: '12345',
+        },
+        body: JSON.stringify({
+            message: 'voterJoined',
+            body: {
+                id: '12345',
+            },
+        }),
     };
 
     const MOCK_GAME_STATE: GameState = {

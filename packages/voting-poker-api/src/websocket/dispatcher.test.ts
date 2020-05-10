@@ -21,6 +21,7 @@ describe('dispatch', () => {
 
     it('calls voter joined handler for voter joined event', async () => {
         const event: WebSocketEvent = {
+            connectionId: '12345',
             message: 'voterJoined',
             body: {
                 id: '12345',
@@ -32,11 +33,12 @@ describe('dispatch', () => {
         const result = await dispatch(event);
 
         expect(result).toBe(MOCK_GAME_STATE);
-        expect(onVoterJoined).toHaveBeenCalledWith(event.body);
+        expect(onVoterJoined).toHaveBeenCalledWith(event.body, event.connectionId);
     });
 
     it('calls vote changed handler for vote changed event', async () => {
         const event: WebSocketEvent = {
+            connectionId: '12345',
             message: 'voteChanged',
             body: {
                 id: '12345',
@@ -55,6 +57,7 @@ describe('dispatch', () => {
 
     it('calls game over handler for game over event', async () => {
         const event: WebSocketEvent = {
+            connectionId: '12345',
             message: 'gameOver',
             body: {
                 id: '12345',
@@ -72,6 +75,7 @@ describe('dispatch', () => {
 
     it('returns an error for an unknown event type', async () => {
         const event: WebSocketEvent = {
+            connectionId: '12345',
             message: 'unknown',
             body: {
                 id: '12345',
