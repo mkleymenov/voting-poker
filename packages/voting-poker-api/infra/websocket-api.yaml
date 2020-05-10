@@ -7,11 +7,12 @@ Globals:
     Timeout: 10
     Tracing: 'Active'
     Environment:
-      API_GW_ENDPOINT: !Sub
-        - '${ApiId}.execute-api.${Region}.amazonaws.com/${ApiStage}/'
-        - ApiId: !Ref VotingPokerWsApi
-          Region: !Ref AWS::Region
-          ApiStage: !Ref ProdStage
+      Variables:
+        API_GW_ENDPOINT: !Sub
+          - '${ApiId}.execute-api.${Region}.amazonaws.com/${ApiStage}/'
+          - ApiId: !Ref VotingPokerWsApi
+            Region: !Ref AWS::Region
+            ApiStage: !Ref ProdStage
 
 Resources:
   VotingPokerWsApi:
