@@ -16,14 +16,14 @@ const badRequest = (): APIGatewayProxyResult => ({
 export const connect = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-    console.log('Connected', event.body);
+    console.log('Connected', event.requestContext.connectionId);
     return ok();
 };
 
 export const disconnect = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-    console.log('Disconnected', event.body);
+    console.log('Disconnected', event.requestContext.connectionId);
     return ok();
 };
 

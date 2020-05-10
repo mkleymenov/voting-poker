@@ -10,7 +10,13 @@ jest.mock('./parser');
 
 describe('connect', () => {
     it('returns a stub response', async () => {
-        const response = await connect({});
+        const event = {
+            requestContext: {
+                connectionId: '12345',
+            },
+        };
+
+        const response = await connect(event);
 
         expect(response).toEqual({
             body: 'OK',
@@ -21,7 +27,13 @@ describe('connect', () => {
 
 describe('disconnect', () => {
     it('returns a stub response', async () => {
-        const response = await disconnect({});
+        const event = {
+            requestContext: {
+                connectionId: '12345',
+            },
+        };
+
+        const response = await disconnect(event);
 
         expect(response).toEqual({
             body: 'OK',
