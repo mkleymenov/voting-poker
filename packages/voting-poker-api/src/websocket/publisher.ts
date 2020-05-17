@@ -1,5 +1,5 @@
 import {GameState, VoterState} from './handler';
-import * as storage from './storage';
+import * as storage from '../shared/storage';
 import AWS from 'aws-sdk';
 
 const API_GW_ENDPOINT = process.env['API_GW_ENDPOINT'] || '';

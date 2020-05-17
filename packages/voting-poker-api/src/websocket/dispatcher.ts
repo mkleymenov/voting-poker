@@ -1,7 +1,17 @@
-import {GameOver, GameState, onGameOver, onVoteChanged, onVoterJoined, VoteChanged, VoterJoined} from './handler';
+import {
+    GameOver,
+    GameState,
+    onGameOver,
+    onVoteChanged,
+    onVoterJoined,
+    onVoterLeft,
+    VoteChanged,
+    VoterJoined,
+    VoterLeft
+} from './handler';
 
-type VotingPokerEventType = 'voterJoined' | 'voteChanged' | 'gameOver';
-type VotingPokerEventBody = VoterJoined | VoteChanged | GameOver;
+type VotingPokerEventType = 'voterJoined' | 'voterLeft' | 'voteChanged' | 'gameOver';
+type VotingPokerEventBody = VoterJoined | VoterLeft | VoteChanged | GameOver;
 
 interface VotingPokerEvent {
     connectionId: string;
@@ -14,6 +24,11 @@ interface VoterJoinedEvent extends VotingPokerEvent {
     body: VoterJoined;
 }
 
+interface VoterLeftEvent extends VotingPokerEvent {
+    message: 'voterLeft',
+    body: VoterLeft,
+}
+
 interface VoteChangedEvent extends VotingPokerEvent {
     message: 'voteChanged';
     body: VoteChanged;
@@ -24,12 +39,14 @@ interface GameOverEvent extends VotingPokerEvent {
     body: GameOver;
 }
 
-export type WebSocketEvent = VoterJoinedEvent | VoteChangedEvent | GameOverEvent;
+export type WebSocketEvent = VoterJoinedEvent | VoterLeftEvent | VoteChangedEvent | GameOverEvent;
 
 const dispatch = async (event: WebSocketEvent): Promise<GameState> => {
     switch (event.message) {
         case 'voterJoined':
             return onVoterJoined(event.body, event.connectionId);
+        case 'voterLeft':
+            return onVoterLeft(event.body);
         case 'voteChanged':
             return onVoteChanged(event.body);
         case 'gameOver':
