@@ -21,8 +21,13 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !ImportValue GameStateTable
       ReservedConcurrentExecutions: 10
       Timeout: 10
+      Environment:
+        Variables:
+          GAME_STATE_TABLE: !ImportValue GameStateTable
       Events:
         ApiEvent:
           Type: Api
