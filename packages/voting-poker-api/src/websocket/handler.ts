@@ -74,14 +74,18 @@ export const onVoterJoined = async (
 };
 
 export const onVoterLeft = async (voterLeft: VoterLeft): Promise<GameState> => {
+    const gameId = await storage.getPlayerGame(voterLeft.id);
+    if (!gameId) {
+        throw new Error('Could not find game id for player ' + voterLeft.id);
+    }
 
+    await storage.leaveGame(gameId, voterLeft.id);
+
+    return await storage.getGameState(gameId);
 };
 
 export const onVoteChanged = async (voteChanged: VoteChanged): Promise<GameState> => {
     const gameState = await storage.getGameState(voteChanged.gameId);
-    if (!gameState) {
-        throw new Error(`There is no game with id ${voteChanged.gameId}`);
-    }
 
     const self = gameState.voters.find(v => v.id === voteChanged.id);
     if (!self) {
@@ -102,9 +106,6 @@ export const onVoteChanged = async (voteChanged: VoteChanged): Promise<GameState
 
 export const onGameOver = async (gameOver: GameOver): Promise<GameState> => {
     const gameState = await storage.getGameState(gameOver.gameId);
-    if (!gameState) {
-        throw new Error(`There is no game with id ${gameOver.gameId}`);
-    }
 
     const self = gameState.voters.find(v => v.id === gameOver.id);
     if (!self) {

@@ -23,8 +23,6 @@ const ITEM_TTL_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
 
 const DB = new AWS.DynamoDB.DocumentClient();
 
-const CONNECTIONS: { [voterId: string]: string } = {};
-
 export const getItemExpirationTime = (): number => Date.now() + ITEM_TTL_MILLIS;
 
 export const toGameStateItem = (
@@ -65,7 +63,7 @@ export const addPlayerToGame = async (
     return player;
 };
 
-export const getPlayerGames = async (playerId: string): Promise<string[]> => {
+export const getPlayerGame = async (playerId: string): Promise<string | undefined> => {
     const response = await DB.query({
         TableName: GAME_STATE_TABLE,
         IndexName: 'Player',
@@ -73,12 +71,16 @@ export const getPlayerGames = async (playerId: string): Promise<string[]> => {
         ExpressionAttributeValues: {
             ':PlayerId': playerId,
         },
+        ProjectionExpression: 'GameId',
+        Limit: 1,
     }).promise();
 
-    return (response.Items || []).map(item => {
-        const playerIndex = item as PlayerIndexItem;
-        return playerIndex.GameId;
-    });
+    return (response.Items || [])
+        .map(item => {
+            const playerIndex = item as PlayerIndexItem;
+            return playerIndex.GameId;
+        })
+        .pop();
 };
 
 export const leaveGame = async (
@@ -96,7 +98,7 @@ export const leaveGame = async (
 
 export const getGameState = async (
     gameId: string,
-): Promise<GameState | null> => {
+): Promise<GameState> => {
     const response = await DB.query({
         TableName: GAME_STATE_TABLE,
         KeyConditionExpression: 'GameId = :GameId',
@@ -105,16 +107,12 @@ export const getGameState = async (
         },
     }).promise();
 
-    if (!response.Items) {
-        return null;
-    }
-
     const initialGameState: GameState = {
         voters: [],
         gameOver: false,
     };
 
-    return response.Items
+    return (response.Items || [])
         .reduce(
             (
                 gameState: GameState,
