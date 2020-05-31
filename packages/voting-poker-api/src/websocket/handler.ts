@@ -1,4 +1,5 @@
 import * as storage from '../shared/storage';
+import * as publisher from './publisher';
 import {v4 as UUID} from 'uuid';
 
 export interface VoterJoined {
@@ -62,6 +63,7 @@ export const onVoterJoined = async (
     };
 
     await storage.addPlayerToGame(player, gameId, gameOver);
+    await publisher.publishConnectionId(connectionId);
 
     const voters = gameState
         ? [...gameState.voters, player]

@@ -8,14 +8,29 @@ const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
     endpoint: API_GW_ENDPOINT,
 });
 
-const publishGameState = async (gameState: GameState): Promise<void> => {
+export const publishConnectionId = async (connectionId: string): Promise<void> => {
+    const payload = {
+        message: 'connect',
+        body: connectionId,
+    };
+
+    await apiGatewayManagementApi.postToConnection({
+        ConnectionId: connectionId,
+        Data: JSON.stringify(payload),
+    }).promise();
+};
+
+export const publishGameState = async (gameState: GameState): Promise<void> => {
+    const payload = {
+        message: 'gameState',
+        body: gameState,
+    };
+
     const promises = gameState.voters.map(async (voter: VoterState) =>
         apiGatewayManagementApi.postToConnection({
             ConnectionId: voter.id,
-            Data: JSON.stringify(gameState),
+            Data: JSON.stringify(payload),
         }).promise()
     );
     await Promise.all(promises);
 };
-
-export default publishGameState;

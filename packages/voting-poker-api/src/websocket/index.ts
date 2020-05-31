@@ -1,6 +1,6 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import dispatch, {WebSocketEvent} from './dispatcher';
-import publishGameState from './publisher';
+import {publishGameState} from './publisher';
 import parseWebSocketEvent from './parser';
 import {VoterLeft} from './handler';
 
@@ -31,7 +31,7 @@ export const disconnect = async (
     }
 
     console.log('Disconnected', requestContext.connectionId);
-    
+
     const voterLeft: VoterLeft = {
         id: requestContext.connectionId,
     };
