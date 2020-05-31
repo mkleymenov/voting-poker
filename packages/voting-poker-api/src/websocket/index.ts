@@ -1,7 +1,8 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
-import dispatch from './dispatcher';
-import publishGameState from './publisher';
+import dispatch, {WebSocketEvent} from './dispatcher';
+import {publishGameState} from './publisher';
 import parseWebSocketEvent from './parser';
+import {VoterLeft} from './handler';
 
 const ok = (): APIGatewayProxyResult => ({
     body: 'OK',
@@ -23,8 +24,31 @@ export const connect = async (
 export const disconnect = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-    console.log('Disconnected', event.requestContext.connectionId);
-    return ok();
+    const {requestContext} = event;
+    if (!requestContext.connectionId) {
+        console.error(`No connection id provided for websocket disconnect event`, event);
+        return badRequest();
+    }
+
+    console.log('Disconnected', requestContext.connectionId);
+
+    const voterLeft: VoterLeft = {
+        id: requestContext.connectionId,
+    };
+    const voterLeftEvent: WebSocketEvent = {
+        message: 'voterLeft',
+        connectionId: requestContext.connectionId,
+        body: voterLeft,
+    };
+
+    try {
+        const gameState = await dispatch(voterLeftEvent);
+        await publishGameState(gameState);
+        return ok();
+    } catch (error) {
+        console.error(`Unable to process a player left event ${event.body}`, error);
+        return badRequest();
+    }
 };
 
 export const message = async (

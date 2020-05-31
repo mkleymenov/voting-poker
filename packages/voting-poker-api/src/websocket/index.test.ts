@@ -1,6 +1,6 @@
 import {connect, disconnect, message} from './index';
 import dispatch, {WebSocketEvent} from './dispatcher';
-import publishGameState from './publisher';
+import {publishGameState} from './publisher';
 import parseWebSocketEvent from './parser';
 import {GameState} from './handler';
 
@@ -9,7 +9,7 @@ jest.mock('./publisher');
 jest.mock('./parser');
 
 describe('connect', () => {
-    it('returns a stub response', async () => {
+    it('returns ok', async () => {
         const event = {
             requestContext: {
                 connectionId: '12345',
@@ -26,8 +26,69 @@ describe('connect', () => {
 });
 
 describe('disconnect', () => {
-    it('returns a stub response', async () => {
+    const MOCK_EVENT = {
+        requestContext: {},
+        body: '',
+    };
+
+    const MOCK_GAME_STATE: GameState = {
+        voters: [{
+            id: '12345',
+            name: 'Test User',
+            voted: true,
+            value: '1',
+            moderator: true,
+        }],
+        gameOver: false,
+    };
+
+    beforeEach(() => {
+        jest.resetAllMocks();
+    });
+
+    it('returns a bad request response if an event is invalid', async () => {
+        const response = await disconnect(MOCK_EVENT);
+
+        expect(response).toEqual({
+            body: 'Bad request',
+            statusCode: 400,
+        });
+
+        expect(dispatch).not.toHaveBeenCalled();
+    });
+
+    it('returns a bad request response if an event cannot be processed', async () => {
+        dispatch.mockImplementationOnce(jest.fn(() => Promise.reject('Boom!')));
+
         const event = {
+            ...MOCK_EVENT,
+            requestContext: {
+                connectionId: '12345',
+            },
+        };
+
+        const response = await disconnect(event);
+
+        expect(response).toEqual({
+            body: 'Bad request',
+            statusCode: 400,
+        });
+
+        expect(dispatch).toHaveBeenCalledWith({
+            message: 'voterLeft',
+            connectionId: '12345',
+            body: {
+                id: '12345',
+            },
+        });
+    });
+
+    it('disconnects a client, publishes an updated game state and returns ok', async () => {
+        dispatch.mockImplementationOnce(jest.fn(() => Promise.resolve(MOCK_GAME_STATE)));
+        publishGameState.mockImplementationOnce(jest.fn(() => Promise.resolve()));
+
+        const event = {
+            ...MOCK_EVENT,
             requestContext: {
                 connectionId: '12345',
             },
@@ -39,6 +100,15 @@ describe('disconnect', () => {
             body: 'OK',
             statusCode: 200,
         });
+
+        expect(dispatch).toHaveBeenCalledWith({
+            message: 'voterLeft',
+            connectionId: '12345',
+            body: {
+                id: '12345',
+            },
+        });
+        expect(publishGameState).toHaveBeenCalledWith(MOCK_GAME_STATE);
     });
 });
 

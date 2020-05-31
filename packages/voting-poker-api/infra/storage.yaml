@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  GameStateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VotingPokerGameState
+      AttributeDefinitions:
+        - AttributeName: GameId
+          AttributeType: S
+        - AttributeName: PlayerId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: GameId
+          KeyType: HASH
+        - AttributeName: PlayerId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: Player
+          KeySchema:
+            - AttributeName: PlayerId
+              KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TimeToLiveSpecification:
+        AttributeName: ExpirationTime
+        Enabled: true
+
+Outputs:
+  GameStateTable:
+    Description: GameState DynamoDB table name
+    Value: !Ref GameStateTable
+    Export:
+      Name: GameStateTable

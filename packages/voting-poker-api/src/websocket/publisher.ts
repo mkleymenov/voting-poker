@@ -1,5 +1,4 @@
 import {GameState, VoterState} from './handler';
-import * as storage from './storage';
 import AWS from 'aws-sdk';
 
 const API_GW_ENDPOINT = process.env['API_GW_ENDPOINT'] || '';
@@ -9,20 +8,29 @@ const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
     endpoint: API_GW_ENDPOINT,
 });
 
-const publishGameState = async (gameState: GameState): Promise<void> => {
-    const promises = gameState.voters.map(async (voter: VoterState) => {
-        const connectionId = await storage.getVoterConnection(voter.id);
-        if (!connectionId) {
-            console.error(`Cannot find connection id for voter ${voter.id}`);
-            return;
-        }
+export const publishConnectionId = async (connectionId: string): Promise<void> => {
+    const payload = {
+        message: 'connect',
+        body: connectionId,
+    };
 
-        return apiGatewayManagementApi.postToConnection({
-            ConnectionId: connectionId,
-            Data: JSON.stringify(gameState),
-        }).promise();
-    });
-    await Promise.all(promises);
+    await apiGatewayManagementApi.postToConnection({
+        ConnectionId: connectionId,
+        Data: JSON.stringify(payload),
+    }).promise();
 };
 
-export default publishGameState;
+export const publishGameState = async (gameState: GameState): Promise<void> => {
+    const payload = {
+        message: 'gameState',
+        body: gameState,
+    };
+
+    const promises = gameState.voters.map(async (voter: VoterState) =>
+        apiGatewayManagementApi.postToConnection({
+            ConnectionId: voter.id,
+            Data: JSON.stringify(payload),
+        }).promise()
+    );
+    await Promise.all(promises);
+};

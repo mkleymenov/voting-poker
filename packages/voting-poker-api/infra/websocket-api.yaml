@@ -13,6 +13,7 @@ Globals:
           - ApiId: !Ref VotingPokerWsApi
             Region: !Ref AWS::Region
             ApiStage: !Ref ProdStage
+        GAME_STATE_TABLE: !ImportValue GameStateTable
 
 Resources:
   VotingPokerWsApi:
@@ -134,6 +135,8 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !ImportValue GameStateTable
       ReservedConcurrentExecutions: 10
 
   DisconnectFunctionPermission:
@@ -152,6 +155,8 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !ImportValue GameStateTable
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
