@@ -108,6 +108,7 @@ export const getGameState = async (
     }).promise();
 
     const initialGameState: GameState = {
+        gameId,
         voters: [],
         gameOver: false,
     };
@@ -121,6 +122,7 @@ export const getGameState = async (
                 const gameStateItem = item as GameStateItem;
                 const voter = toVoterState(gameStateItem);
                 return {
+                    gameId,
                     voters: [
                         ...gameState.voters,
                         voter,

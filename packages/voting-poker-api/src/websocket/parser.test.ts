@@ -54,7 +54,7 @@ describe('parseWebSocketEvent', () => {
             requestContext: {
                 connectionId: '12345',
             },
-            body: '{"message": "voterJoined", "body": {"id": "12345"}}',
+            body: '{"message": "voterJoined", "body": {"name": "Test User", "gameId": "12345"}}',
         };
 
         const result = await parseWebSocketEvent(event);
@@ -63,7 +63,8 @@ describe('parseWebSocketEvent', () => {
             connectionId: '12345',
             message: 'voterJoined',
             body: {
-                id: '12345',
+                name: 'Test User',
+                gameId: '12345',
             },
         });
     });

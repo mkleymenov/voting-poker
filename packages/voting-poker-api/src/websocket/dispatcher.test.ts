@@ -5,6 +5,7 @@ jest.mock('./handler');
 
 describe('dispatch', () => {
     const MOCK_GAME_STATE: GameState = {
+        gameId: '12345',
         voters: [{
             id: '12345',
             name: 'Test User',
@@ -24,7 +25,8 @@ describe('dispatch', () => {
             connectionId: '12345',
             message: 'voterJoined',
             body: {
-                id: '12345',
+                name: 'Test User',
+                gameId: '12345',
             },
         };
 
@@ -42,6 +44,7 @@ describe('dispatch', () => {
             message: 'voteChanged',
             body: {
                 id: '12345',
+                gameId: '67890',
                 voted: true,
                 value: '1',
             },
@@ -61,6 +64,7 @@ describe('dispatch', () => {
             message: 'gameOver',
             body: {
                 id: '12345',
+                gameId: '67890',
                 gameOver: true,
             },
         };

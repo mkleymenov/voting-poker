@@ -1,59 +1,99 @@
 import {IMessageEvent, w3cwebsocket as W3CWebSocket} from 'websocket';
-import {useEffect, useState} from 'react';
+import {MutableRefObject, useCallback, useEffect, useRef, useState} from 'react';
+import {VoterState, VotingPokerState} from '../votingpoker';
 
-export type WebSocketSend = (message: string, body: object) => void;
+type WebSocketEventType = 'connect' | 'gameState';
+type WebSocketEventBody = VotingPokerState | VoterState;
+
+interface WebSocketEvent {
+    message: WebSocketEventType;
+    body: WebSocketEventBody;
+}
+
+export interface ConnectMessage extends WebSocketEvent {
+    message: 'connect';
+    body: VoterState;
+}
+
+export interface GameStateMessage extends WebSocketEvent {
+    message: 'gameState';
+    body: VotingPokerState;
+}
+
+export type WebSocketMessage = ConnectMessage | GameStateMessage;
 
 export type WebSocketContext = {
-    send: WebSocketSend;
+    send: (message: string, body: object) => void;
+    lastMessage: WebSocketMessage | null;
+    isConnected: boolean;
 };
 
-export type WebSocketMessage = IMessageEvent;
+const READY_STATE_CONNECTED = 1;
 
-const NOOP_CONTEXT: WebSocketContext = {
-    send: (message, body) => {
-        console.error(`Unable to send message ${message} with body ${body}: WebSocket is not initialized`);
-    },
-};
+export const useWebsocket = (url: string): WebSocketContext => {
+    const websocket: MutableRefObject<W3CWebSocket | null> = useRef<W3CWebSocket>(null);
+    const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
+    const [isConnected, setConnected] = useState(false);
 
-const createContext = (websocket: W3CWebSocket): WebSocketContext => {
-    const send = (message: string, body: object) => {
-        if (websocket) {
-            websocket.send(JSON.stringify({
-                message,
-                body,
-            }));
+    const send = useCallback(
+        (message: string, body: object) => {
+            const ws = websocket.current;
+            if (ws && ws.readyState === READY_STATE_CONNECTED) {
+                ws.send(JSON.stringify({
+                    message,
+                    body,
+                }));
+            }
+        },
+        [],
+    );
+
+    const parseWebSocketMessage = (
+        event: IMessageEvent,
+    ): WebSocketMessage | null => {
+        try {
+            const json = JSON.parse(event.data.toString());
+            if (json && typeof json.message != 'undefined' && typeof json.body != 'undefined') {
+                return json as WebSocketMessage;
+            } else {
+                console.error(`Expected WebSocketMessage JSON, received ${json}`);
+            }
+        } catch (e) {
+            console.error(`Expected WebSocketMessage JSON, received invalid JSON: ${event.data}`, e);
         }
+
+        return null;
     };
+
+    useEffect(() => {
+            const ws = new W3CWebSocket(url);
+            ws.onopen = () => setConnected(true);
+            ws.onclose = () => setConnected(false);
+            ws.onmessage = (event: IMessageEvent) => {
+                const message = parseWebSocketMessage(event);
+                if (message) {
+                    setLastMessage(message);
+                }
+            };
+            ws.onerror = console.error;
+
+            websocket.current = ws;
+
+            return () => {
+                const ws = websocket.current;
+                if (ws) {
+                    ws.close();
+                }
+            };
+        },
+        [],
+    );
 
     return {
         send,
+        lastMessage,
+        isConnected,
     };
-};
-
-export const useWebsocket = (
-    url: string,
-    onConnect: (context: WebSocketContext) => void,
-    onMessage: (message: WebSocketMessage, context: WebSocketContext) => void,
-): WebSocketContext => {
-    const [context, setContext] = useState<WebSocketContext>(NOOP_CONTEXT);
-
-    useEffect(
-        () => {
-            const websocket = new W3CWebSocket(url);
-
-            const context = createContext(websocket);
-            setContext(context);
-
-            websocket.onopen = () => onConnect(context);
-            websocket.onmessage = (message) => onMessage(message as WebSocketMessage, context);
-            websocket.onerror = console.error;
-
-            return () => websocket.close();
-        },
-        [url, onConnect, onMessage],
-    );
-
-    return context;
 };
 
 export default useWebsocket;

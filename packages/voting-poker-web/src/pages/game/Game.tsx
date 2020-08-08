@@ -14,11 +14,10 @@ type Props = {
     self: VoterState;
     gameState: VotingPokerState;
     onVoteChanged: (value?: CardValue) => void;
-    onGameOver: () => void;
-    onGameRestart: () => void;
+    onGameOverChanged: (gameOver: boolean) => void;
 };
 
-export const GameComponent = ({self, gameState, onVoteChanged, onGameOver, onGameRestart}: Props) => {
+export const GameComponent = ({self, gameState, onVoteChanged, onGameOverChanged}: Props) => {
     const cards = CARD_VALUES.map(value => ({
         value,
         selected: self.voted && self.value === value,
@@ -32,6 +31,16 @@ export const GameComponent = ({self, gameState, onVoteChanged, onGameOver, onGam
             onVoteChanged(value);
         },
         [onVoteChanged],
+    );
+
+    const onGameOver = useCallback(
+        () => onGameOverChanged(true),
+        [onGameOverChanged],
+    );
+
+    const onGameRestart = useCallback(
+        () => onGameOverChanged(false),
+        [onGameOverChanged],
     );
 
     return (

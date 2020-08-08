@@ -33,6 +33,7 @@ export interface VoterState {
 }
 
 export interface GameState {
+    gameId: string;
     voters: VoterState[];
     gameOver: boolean;
 }
@@ -63,13 +64,14 @@ export const onVoterJoined = async (
     };
 
     await storage.addPlayerToGame(player, gameId, gameOver);
-    await publisher.publishConnectionId(connectionId);
+    await publisher.publishPlayerState(connectionId, player);
 
     const voters = gameState
         ? [...gameState.voters, player]
         : [player];
 
     return {
+        gameId,
         voters,
         gameOver,
     };
@@ -127,6 +129,7 @@ export const onGameOver = async (gameOver: GameOver): Promise<GameState> => {
         }));
 
     return await storage.saveGameState(gameOver.gameId, {
+        gameId: gameOver.gameId,
         voters: newVoters,
         gameOver: gameOver.gameOver,
     });

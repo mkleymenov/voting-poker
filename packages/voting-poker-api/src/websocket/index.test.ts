@@ -32,6 +32,7 @@ describe('disconnect', () => {
     };
 
     const MOCK_GAME_STATE: GameState = {
+        gameId: '12345',
         voters: [{
             id: '12345',
             name: 'Test User',
@@ -116,7 +117,8 @@ describe('message', () => {
     const MOCK_WS_EVENT: WebSocketEvent = {
         message: 'voterJoined',
         body: {
-            id: '12345',
+            name: 'Test User',
+            gameId: null,
         },
         connectionId: '12345',
     };
@@ -128,12 +130,14 @@ describe('message', () => {
         body: JSON.stringify({
             message: 'voterJoined',
             body: {
-                id: '12345',
+                name: 'Test User',
+                gameId: '12345',
             },
         }),
     };
 
     const MOCK_GAME_STATE: GameState = {
+        gameId: '12345',
         voters: [{
             id: '12345',
             name: 'Test User',

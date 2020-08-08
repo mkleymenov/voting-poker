@@ -8,10 +8,13 @@ const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
     endpoint: API_GW_ENDPOINT,
 });
 
-export const publishConnectionId = async (connectionId: string): Promise<void> => {
+export const publishPlayerState = async (
+    connectionId: string,
+    playerState: VoterState,
+): Promise<void> => {
     const payload = {
         message: 'connect',
-        body: connectionId,
+        body: playerState,
     };
 
     await apiGatewayManagementApi.postToConnection({

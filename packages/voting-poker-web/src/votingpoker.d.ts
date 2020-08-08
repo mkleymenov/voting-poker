@@ -19,6 +19,7 @@ export interface VoterState {
 }
 
 export interface VotingPokerState {
+    gameId: string;
     voters: VoterState[];
     gameOver: boolean;
 }
